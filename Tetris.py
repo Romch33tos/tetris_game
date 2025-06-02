@@ -50,7 +50,7 @@ class Tetris:
     self.is_fast_dropping = False
     self.game_over_text = None
     
-    self.start_text = self.canvas.create_text(WIDTH // 2, HEIGHT // 2, text="Нажми, чтобы\n  начать игру!", fill="white", font=("Arial", 16))
+    self.start_text = self.canvas.create_text(WIDTH // 2, HEIGHT // 2, text="Нажми, чтобы начать игру!", fill="white", font=("Arial", 16))
     
     self.board = [[0 for _ in range(COLS)] for _ in range(ROWS)]
     self.root.bind('<Left>', self.move_left)
@@ -59,6 +59,7 @@ class Tetris:
     self.root.bind('<Up>', self.rotate)
 
     self.canvas.bind("<Button-1>", self.start_game)
+    self.current_speed = SPEED
 
   def update_next_piece(self):
     index = random.randint(0, len(SHAPES) - 1)
@@ -122,6 +123,8 @@ class Tetris:
       self.score_label.config(text=f"Счёт: {self.score}")
       self.board = [[0 for _ in range(COLS)] for _ in range(ROWS)]
       self.game_over_flag = False
+      self.current_speed = SPEED
+      
       self.spawn_piece()
       self.update()
       if self.game_over_text:
@@ -188,7 +191,11 @@ class Tetris:
     for y in lines_to_clear:
       del self.board[y]
       self.board.insert(0, [0 for _ in range(COLS)])
+
       self.score += 100
+
+      if self.score // 100 > (self.score - 100) // 100:
+          self.current_speed = max(50, self.current_speed - 10)
 
     self.score_label.config(text=f"Счёт: {self.score}")
 
@@ -228,7 +235,8 @@ class Tetris:
           self.merge_piece()
 
       self.draw_board()
-      self.after_id = self.root.after(SPEED, self.update)
+      
+      self.after_id = self.root.after(self.current_speed, self.update)
 
 if __name__ == "__main__":
   root = tk.Tk()
